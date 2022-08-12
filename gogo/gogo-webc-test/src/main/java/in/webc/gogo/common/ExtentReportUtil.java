@@ -1,0 +1,65 @@
+package in.webc.gogo.common;
+
+import org.testng.ITestResult;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.Status;
+import com.aventstack.extentreports.markuputils.ExtentColor;
+import com.aventstack.extentreports.markuputils.MarkupHelper;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+
+
+public class ExtentReportUtil {
+	public static ExtentReports extentReport;
+	public static ExtentTest extendLog;
+	
+	
+	public static void initExtendReportConfig(String suiteName){
+		extentReport = new ExtentReports ();
+		ExtentSparkReporter spark = new ExtentSparkReporter(System.getProperty("user.dir") +"/test-report/"+suiteName+".html");
+		spark.config().setDocumentTitle("My Test Report");
+		spark.config().setReportName(suiteName+ "  Report");
+		spark.config().setOfflineMode(true);
+		extentReport.attachReporter(spark);
+		extentReport.setSystemInfo("Host Name", "123.11.5.6.2");
+		extentReport.setSystemInfo("Environment", "Automation Testing - Performance Region");
+		
+		
+	}
+	public static void endExtendReportCreation(){
+		// writing everything to document
+		//flush() - to write or update test information to your report. 
+		extentReport.flush();
+                
+    }
+	public static void recordTestCaseResult(ITestResult itestResult) {
+		initTestCaseReport(itestResult);
+		String testCaseName = itestResult.getName();
+		if (itestResult.getStatus() == ITestResult.SUCCESS) {
+			
+			ExtentReportUtil.extendLog.log(Status.PASS,MarkupHelper.createLabel( testCaseName.concat(" passed"), ExtentColor.GREEN ));
+			
+		}else if (itestResult.getStatus() == ITestResult.FAILURE) {
+			Throwable s = itestResult.getThrowable();
+			ExtentReportUtil.extendLog.log(Status.FAIL, MarkupHelper.createLabel(testCaseName.concat(" Failed. Reason: "+s.getMessage()), ExtentColor.RED));
+			ExtentTest subSection = ExtentReportUtil.extendLog.createNode("Screenshot for failed Testcase");
+			String screenShotPath = (String) itestResult.getAttribute("SCREENSHOT_PATH");
+			subSection.log(Status.FAIL, MediaEntityBuilder.createScreenCaptureFromPath(screenShotPath).build());
+			// https://stackoverflow.com/questions/61073005/how-to-attach-screenshot-to-extent-report-in-java-selenium
+			
+		}else if (itestResult.getStatus() == ITestResult.SKIP) {
+			Throwable s = itestResult.getThrowable();
+			ExtentReportUtil.extendLog.log(Status.FAIL, " SKIPPED. Reason: "+s.getMessage());
+		}
+		
+	}
+	private static void initTestCaseReport(ITestResult itestResult) {
+		String userStory = itestResult.getTestClass().getRealClass().getSimpleName(); // test class name
+		String testCaseName = itestResult.getName(); // test method name 
+		String testCaseReportDetail = userStory.concat(" -> ").concat(testCaseName);
+		ExtentReportUtil.extendLog = ExtentReportUtil.extentReport.createTest(testCaseReportDetail);
+	}
+
+}

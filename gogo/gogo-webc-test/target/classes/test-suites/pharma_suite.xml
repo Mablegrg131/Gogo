@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Pharama Suite" verbose="10">
+
+	<test name="Pharama Test" preserve-order="true">
+
+		<classes>
+			<class name="in.webc.gogo.test.landingpage.PharmaTest" />
+		</classes>
+	</test>
+
+
+
+</suite>
